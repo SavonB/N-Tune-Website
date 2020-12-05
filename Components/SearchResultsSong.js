@@ -27,11 +27,10 @@ class SearchResultsSong extends React.Component {
 
     }
 
-    _clicked(title) {
+    _clicked(result) {
 
         //when song is clicked send us to song page
-        window.location.href = `http://localhost:3000/catalog/${title}`;
-        console.log(title);
+        window.location.href = `http://localhost:3000/catalog/song/${result.title}/artists/${result.artists}`;
 
 
     }
@@ -39,8 +38,8 @@ class SearchResultsSong extends React.Component {
     render() {
         
         const listItems = this.state.songs.map((result) =>
-            <li id={result.title} onClick={() => this._clicked(result.title)}>
-                {result.title}
+            <li id={result.title} onClick={() => this._clicked(result)}>
+                {result.title} By {result.artists}
             </li>
 
         );
