@@ -27,7 +27,7 @@ function App() {
                         <UserDashboard />
                     </Route>
 
-                    <Route path="/catalog/:song">
+                    <Route path="/catalog/song/:song/artists/:artists">
                         <SongDashboard />
                     </Route>
 

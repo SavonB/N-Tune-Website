@@ -13,13 +13,18 @@ const jsonParser = bodyParser.json();
 app.use(cors());
 
 const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://knxwledge:<password>@ntune-cluster.ryvsd.mongodb.net/users?retryWrites=true&w=majority";
+const uri = "mongodb+srv://knxwledge:1988@ntune-cluster.ryvsd.mongodb.net/users?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useUnifiedTopology: true });
 
 
 
 
-
+function checkNullBody(body) {
+    for (let member in body) {
+        if (body[member] == null) { return true; }
+    }
+    return false;
+}
 async function connectDB() {
     await client.connect();
 
@@ -36,6 +41,10 @@ async function getUsers(req, res){
 }
 async function getPlaylists(req, res) {
     response = await playlistTable.find(req.query).toArray();
+    res.json(response);
+}
+async function getSongs(req, res) {
+    response = await songTable.find(req.query).toArray();
     res.json(response);
 }
 async function updateAddUser(req, res) {
@@ -79,9 +88,9 @@ async function addPlaylist(req, res) {
     //let exists = await playlistTable.find({ 'name': req.body.name });
     let exists = await playlistTable.find({ _id: req.body._id });
     let arr = await exists.toArray();
-    if (arr.length > 0) {
+    if (arr.length > 0 || checkNullBody(req.body)==true) {
         
-        let response = { 'success': 'No, playlist already exists' };
+        let response = { 'success': 'No, playlist already exists or body has a null value' };
         res.json(response);
         return;
     }
@@ -119,8 +128,60 @@ async function modifyPlaylist(req, res) {
     res.json({ 'success': 'Playlists Updated' });
     return
 }
+async function addSong(req, res) {
+    //if we match the id of a song return playlist already exists
+    let exists = await songTable.find({ _id: req.body._id });
+    let arr = await exists.toArray();
+    if (arr.length > 0 || (checkNullBody(req.body)==true)) {
 
+        let response = { 'success': 'No, song already exists or body has null values' };
+        res.json(response);
+        return;
+    }
+    //else add Song and return that we did
+    let rewrap = {
+        _id: req.body._id, //artist + song maybe
+        title: req.body.title, //string
+        artists: req.body.artists, //array
+        year: req.body.year, //0 < int < today
+        genres: req.body.genres, //array of genres it fall in
+        album: req.body.album, //string
+        likes: req.body.likes, //float > 0
+        dislikes: req.body.dislikes, //float > 0
+        available_at: req.body.available_at //Array of places to listen
+    }
 
+    let response = await songTable.insertOne(rewrap);
+    res.json({ 'success': 'Song Added' });
+}
+async function modifySong(req, res) {
+    
+    //search for playlist by the id with searchQuery
+    let searchQuery = { _id: req.body.uniqueid }
+
+    //if playlist doesnt exist then we return 
+    song = await songTable.find(searchQuery).toArray();
+    console.log(song, req.body);
+    if (song.length == 0) {
+        //song doesn't exist
+        let response = {
+            'success': 'Can\'t modify a nonexistent song, check id',
+            'id': req.body.uniqueid};
+        res.json(response);
+        return;
+
+    }
+
+    updateQuery = {
+        $set: {
+            likes: req.body.likes,
+            dislikes: req.body.dislikes
+        }
+    };
+    let response = await songTable.updateOne(searchQuery, updateQuery);
+    res.json({ 'success': 'Song Updated' });
+    return
+}
 
 
 
@@ -136,7 +197,7 @@ let playlistTable = 0;
 connectDB();
 app.get('/users', getUsers); /* get users with optional name supplied*/
 app.get('/playlists',getPlaylists) /*get playlists with optional parameters supplied*/
-//app.get('/songs',getSongs) /*get Songs with optional parameters supplied*/
+app.get('/songs',getSongs) /*get Songs with optional parameters supplied*/
 
 /*add or update users. it ensures uniqueness
 because we can only add users by updating ones that dont exist */
@@ -146,20 +207,11 @@ app.post('/update/:username', jsonParser, updateAddUser);
 app.post('/playlistAugs/add', jsonParser, addPlaylist)
 
 /*when modifying we must supply that same name*/
-app.post('/playlistAugs/update/:uniqueid',jsonParser,modifyPlaylist)
+app.post('/playlistAugs/update/:uniqueid', jsonParser, modifyPlaylist)
 
-/*when adding songs to the song table (not a playlist) a song object is
-    _id: let mongo handle
-    title: string
-    artists_vocal: array
-    artists_ instrumental: array
-    year: 0 < int < today
-    genres: array of genres it fall in
-    album: string
-    likes: float > 0
-    dislikes: float > 0
-    available_at: Array of places to listen
-*/
+app.post('/addSong', jsonParser, addSong)
+app.post('/updateSong', jsonParser, modifySong);
+
 
 
 
