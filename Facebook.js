@@ -31,15 +31,14 @@ export default class Facebook extends Component {
     
     render() {
         let fbContent;
-        if(this.state.isloggedin){
+        if(this.state.isLoggedin){
             fbContent = (
                 <div style={{
                     width: "400px", 
-                    margin:"auto", 
-                    background: "blue", 
+                    margin:"auto",  
                     padding:"20px"
                     }}> 
-                    <h1>Hi {this.state.name}</h1>
+                    <h1>Hi, {this.state.name}</h1>
                     </div>
                     
 
@@ -50,7 +49,7 @@ export default class Facebook extends Component {
             fbContent= (
             <FacebookLogin
                 appId="422848558900471"
-                autoLoad={true}
+                autoLoad={false}
                 fields="name, email,picture"
                 onClick={this.componentClicked}
                 callback={this.responseFacebook} />);
