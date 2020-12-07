@@ -11,7 +11,7 @@ import SearchResultsSong from './Components/SearchResultsSong/SearchResultsSong.
 import SearchResultsPlaylist from './Components/SearchResultsPlaylist/SearchResultsPlaylist.js';
 import SongDashboard from './Components/SongDashboard/SongDashboard.js'
 import PlaylistDashboard from './Components/PlaylistDashboard/PlaylistDashboard.js'
-
+import CreateAccount from './Components/CreateAccount/CreateAccount.js'
 import UserDashboard from './Components/UserDashboard/UserDashboard.js';
 function App() {
     return (
@@ -22,7 +22,9 @@ function App() {
 
 
                     
-
+                    <Route path="/createAccount">
+                        <CreateAccount />
+                    </Route>
                     <Route path="/profile/:user">
                         <UserDashboard />
                     </Route>

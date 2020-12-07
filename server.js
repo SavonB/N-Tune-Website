@@ -69,6 +69,7 @@ async function updateAddUser(req, res) {
         name: req.body.name,
         preferences: req.body.preferences,
         type: req.body.type,
+        "favorite-artists": req.body.favorite_artists,
         connects: req.body.connects,
         playlists: req.body.playlists
     }
